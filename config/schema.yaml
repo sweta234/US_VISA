@@ -1,45 +1,39 @@
- columns:
- -  CreditScore : int
- -  Geography : category
- -  Gender : category
- -  Age : int
- -  Tenure : int
- -  Balance : int
- -  NumOfProducts : int
- -  HasCrCard : int
- -  IsActiveMember : int 
- -  RowNumber : int
- -  CustomerId : int
- -  Surname : category
+columns:
+ - CreditScore : int
+ - Geography : category
+ - Gender : category
+ - Age : int
+ - Tenure : int
+ - Balance : int
+ - NumOfProducts : int
+ - HasCrCard : int
+ - IsActiveMember : int 
+ - RowNumber : int
+ - CustomerId : int
+ - Surname : category
  
- numerical_columns:
- -  Tenure 
- -  Balance 
- -  NumOfProducts
- -  HasCrCard 
- -  IsActiveMember
- -  CreditScore 
- -  Age
- -  RowNumber
- -  CustomerId 
+numerical_columns:
+ - Tenure 
+ - Balance 
+ - NumOfProducts
+ - HasCrCard 
+ - IsActiveMember
+ - CreditScore 
+ - Age
+ - RowNumber
+ - CustomerId 
 
+categorical_columns:   # ✅ fixed spelling
+ - Gender 
+ - Geography
+ - Surname
 
- categogical_columns: 
-  Gender 
-  Geography
-  Surname
- drop_columns:
-  RowNumber
-  CustomerId
-  Surname
+drop_columns:
+ - RowNumber
+ - CustomerId
+ - Surname
 
 # for transformation 
- oh_columns :
-  Gender
-  Geography
-
-
-
-
-
-
+oh_columns:
+ - Gender
+ - Geography

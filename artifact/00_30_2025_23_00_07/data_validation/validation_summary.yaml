@@ -1,0 +1,3 @@
+drift_report_path: artifact\00_30_2025_23_00_07\data_validation\drift_report\report.yaml
+message: No errors found
+validation_status: true
