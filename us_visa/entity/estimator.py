@@ -8,10 +8,8 @@ from us_visa.logger import logging
 
 class TargetValueMapping:
     def __init__(self):
-        self.certified:int = 0
-        self.denied :int = 1
-    def __asdict(self):
-        return self.__dict__
-    def reverse_mapping (self):
-        mapping_respond = self.__asdict()
-        return dict(zip(mapping_respond.values(), mapping_respond.keys()))
+        # Mapping 0 → Not Exited, 1 → Exited
+        self.mapping = {0: "Not Exited", 1: "Exited"}
+
+    def reverse_mapping(self):
+        return self.mapping

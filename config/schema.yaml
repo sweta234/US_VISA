@@ -11,7 +11,7 @@ columns:
  - RowNumber : int
  - CustomerId : int
  - Surname : category
- 
+
 numerical_columns:
  - Tenure 
  - Balance 
@@ -20,20 +20,16 @@ numerical_columns:
  - IsActiveMember
  - CreditScore 
  - Age
- - RowNumber
- - CustomerId 
 
-categorical_columns:   # ✅ fixed spelling
+categorical_columns:
  - Gender 
  - Geography
- - Surname
 
 drop_columns:
  - RowNumber
  - CustomerId
  - Surname
 
-# for transformation 
 oh_columns:
  - Gender
  - Geography
