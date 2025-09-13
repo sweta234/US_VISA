@@ -1,58 +1,49 @@
-def initiate_data_validation(self) -> DatavalidationArtifact:
+def get_data_transformer_object(self) -> Pipeline:
         """
-        Method Name :   initiate_data_validation
-        Description :   This method initiates the data validation component for the pipeline
+        Method Name :   get_data_transformer_object
+        Description :   This method creates and returns a data transformer object for the data
         
-        Output      :   Returns bool value based on validation results
+        Output      :   data transformer object is created and returned 
         On Failure  :   Write an exception log and then raise an exception
         """
+        logging.info(
+            "Entered get_data_transformer_object method of DataTransformation class"
+        )
 
         try:
-            validation_error_msg = ""
-            logging.info("Starting data validation")
-            train_df, test_df = (DataValidation.read_data(file_path=self.data_ingestion_artifact.trained_file_path),
-                                 DataValidation.read_data(file_path=self.data_ingestion_artifact.test_file_path))
+            logging.info("Got numerical cols from schema config")
 
-            status = self.validate_number_of_columns(dataframe=train_df)
-            logging.info(f"All required columns present in training dataframe: {status}")
-            if not status:
-                validation_error_msg += f"Columns are missing in training dataframe."
-            status = self.validate_number_of_columns(dataframe=test_df)
+            numeric_transformer = StandardScaler()
+            oh_transformer = OneHotEncoder()
+            ordinal_encoder = OrdinalEncoder()
 
-            logging.info(f"All required columns present in testing dataframe: {status}")
-            if not status:
-                validation_error_msg += f"Columns are missing in test dataframe."
+            logging.info("Initialized StandardScaler, OneHotEncoder, OrdinalEncoder")
 
-            status = self.is_column_exist(df=train_df)
+            oh_columns = self._schema_config['oh_columns']
+            or_columns = self._schema_config['or_columns']
+            transform_columns = self._schema_config['transform_columns']
+            num_features = self._schema_config['num_features']
 
-            if not status:
-                validation_error_msg += f"Columns are missing in training dataframe."
-            status = self.is_column_exist(df=test_df)
+            logging.info("Initialize PowerTransformer")
 
-            if not status:
-                validation_error_msg += f"columns are missing in test dataframe."
+            transform_pipe = Pipeline(steps=[
+                ('transformer', PowerTransformer(method='yeo-johnson'))
+            ])
+            preprocessor = ColumnTransformer(
+                [
+                    ("OneHotEncoder", oh_transformer, oh_columns),
+                    ("Ordinal_Encoder", ordinal_encoder, or_columns),
+                    ("Transformer", transform_pipe, transform_columns),
+                    ("StandardScaler", numeric_transformer, num_features)
+                ]
+            )
 
-            validation_status = len(validation_error_msg) == 0
+            logging.info("Created preprocessor object from ColumnTransformer")
 
-            if validation_status:
-                drift_status = self.detect_dataset_drift(train_df, test_df)
-                if drift_status:
-                    logging.info(f"Drift detected.")
-                    validation_error_msg = "Drift detected"
-                else:
-                    validation_error_msg = "Drift not detected"
-            else:
-                logging.info(f"Validation_error: {validation_error_msg}")
-                
+            logging.info(
+                "Exited get_data_transformer_object method of DataTransformation class"
+            )
+            return preprocessor
 
-            data_validation_artifact = DatavalidationArtifact(
-            validation_status=validation_status,
-            message=validation_error_msg,   # <-- using `message`
-            drift_report_file_path=self.data_validation_config.drift_report_file_path
-)
-
-
-            logging.info(f"Data validation artifact: {data_validation_artifact}")
-            return data_validation_artifact
         except Exception as e:
             raise USvisaException(e, sys) from e
