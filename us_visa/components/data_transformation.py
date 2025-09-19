@@ -8,18 +8,19 @@ from sklearn.compose import ColumnTransformer
 
 from us_visa.constants import TARGET_COLUMNS , SCHEMA_FILE_PATH, CURRENT_YEAR
 
-from us_visa.entity.config_entity import DataTranformationConfig
+from us_visa.entity.config_entity import DataTransformationConfig
 from us_visa.entity.artifact_entity import DataIngestionArtifact, DataTransformationArtifact, DatavalidationArtifact
 from us_visa.exception import USvisaException
 from us_visa.logger import logging
 from us_visa.utils.main_utils import save_object, save_numpy_array_data, read_yaml_file, drop_columns
 
 from us_visa.entity.estimator import TargetValueMapping
+import os
 
 class DataTransformation:
     def __init__(self, 
                  data_ingestion_artifact: DataIngestionArtifact,
-                 data_transformation_config: DataTranformationConfig,
+                 data_transformation_config: DataTransformationConfig,
                  data_validation_artifact: DatavalidationArtifact):
         try:
             self.data_ingestion_artifact = data_ingestion_artifact
@@ -102,10 +103,20 @@ class DataTransformation:
             train_arr = np.c_[input_feature_train_final, np.array(target_feature_train_final)]
             test_arr = np.c_[input_feature_test_final, np.array(target_feature_test_final)]
 
-            # Save objects
+            
+            # ✅ Ensure directories exist before saving
+            os.makedirs(os.path.dirname(self.data_transformation_config.transformed_train_file_path), exist_ok=True)
+            os.makedirs(os.path.dirname(self.data_transformation_config.transformed_test_file_path), exist_ok=True)
+            #os.makedirs(os.path.dirname(self.data_transformation_config.transformed_object_file_path), exist_ok=True)
+
+             # Save preprocessor object and numpy arrays
             save_object(self.data_transformation_config.transformed_object_file_path, preprocessor)
-            save_numpy_array_data(self.data_transformation_config.transformed_train_file_path, train_arr)
-            save_numpy_array_data(self.data_transformation_config.transformed_test_file_path, test_arr)
+            np.save(self.data_transformation_config.transformed_train_file_path, train_arr)
+            np.save(self.data_transformation_config.transformed_test_file_path, test_arr)
+
+            logging.info("Data transformation completed successfully")
+
+
 
            # Return artifact
             return DataTransformationArtifact(

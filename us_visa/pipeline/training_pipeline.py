@@ -1,14 +1,26 @@
 import sys
 from us_visa.components.data_transformation import DataTransformation
+# from us_visa.components.fgh import DataTranformationConfig
 from us_visa.exception import USvisaException
 from us_visa.logger import logging
 from us_visa.components.data_ingestion import DataIngestion
 from us_visa.components.data_validation import DataValidation
+from us_visa.components.model_trainer import ModelTrainer
 
-from us_visa.entity.config_entity import (DataIngestionConfig, Datavalidationconfig, DataTranformationConfig)
 
 
-from us_visa.entity.artifact_entity import (DataIngestionArtifact,DatavalidationArtifact,DataTransformationArtifact)
+from us_visa.entity.config_entity import (
+    DataIngestionConfig,
+    Datavalidationconfig,
+    DataTransformationConfig,   # ✅ Correct spelling
+    ModelTrainerConfig
+)
+
+
+
+
+from us_visa.entity.artifact_entity import (DataIngestionArtifact,DatavalidationArtifact,DataTransformationArtifact,
+                                            ModelTrainerArtifact)
 
 
 
@@ -16,7 +28,7 @@ class Trainpipeline:
     def __init__(self):
         self.data_ingestion_config = DataIngestionConfig()
         self.data_validation_config = Datavalidationconfig()
-        self.data_transformation_config = DataTranformationConfig()
+        self.data_transformation_config = DataTransformationConfig()
 
 
     def start_data_ingestion(self) -> DataIngestionArtifact:
@@ -48,6 +60,21 @@ class Trainpipeline:
             return data_transformation_artifact
         except Exception as e:
             raise USvisaException(e, sys)
+    
+    def start_model_trainer(self,data_transformation_artifact : DataIngestionArtifact):
+        """
+        This method of transformation class responsiable for start model training
+
+        """
+        try:
+            model_trainer = ModelTrainer(data_transformation_artifact=data_transformation_artifact, 
+                                         model_trainer_config= self.model_trainer_config)
+            model_trainer_artifact = model_trainer.initiate_model_trainer()
+            return model_trainer_artifact
+        
+        except Exception as e:
+            raise USvisaException (e, sys)
+            
     
     def start_data_validation(self, data_ingestion_artifact: DataIngestionArtifact) -> DatavalidationArtifact:
         """
@@ -82,6 +109,7 @@ class Trainpipeline:
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
             data_transformation_artifact = self.start_data_transformation(data_ingestion_artifact=data_ingestion_artifact, 
                                                                           data_validation_artifact=data_validation_artifact)
+            model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
         except Exception  as e:
             raise USvisaException(e, sys)
         
